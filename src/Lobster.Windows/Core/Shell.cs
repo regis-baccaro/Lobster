@@ -12,6 +12,40 @@ public static class Shell
 {
     public static string ExePath => Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "Lobster.exe");
 
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern int GetCurrentPackageFullName(ref int length, System.Text.StringBuilder? name);
+
+    private static bool? _packaged;
+
+    /// <summary>
+    /// True when Lobster runs as an MSIX package (Microsoft Store). Windows then installs, updates and
+    /// uninstalls it, and registry / Start-menu / Send To writes are virtualized — so Lobster uses the
+    /// package's own declarations (startup task, "Open with" file associations) instead.
+    /// </summary>
+    public static bool IsPackaged
+    {
+        get
+        {
+            if (_packaged is bool p) return p;
+            try
+            {
+                int len = 0;
+                _packaged = GetCurrentPackageFullName(ref len, null) != 15700; // APPMODEL_ERROR_NO_PACKAGE
+            }
+            catch { _packaged = false; }
+            return _packaged.Value;
+        }
+    }
+
+    private const string StartupTaskId = "LobsterStartup";
+
+    private static Windows.ApplicationModel.StartupTaskState PackagedStartupState() =>
+        System.Threading.Tasks.Task.Run(async () => (await Windows.ApplicationModel.StartupTask.GetAsync(StartupTaskId)).State).GetAwaiter().GetResult();
+
+    /// <summary>Store build: the user turned startup off in Task Manager, so only they can turn it back on.</summary>
+    public static bool StartupBlockedByUser => IsPackaged &&
+        PackagedStartupState() is Windows.ApplicationModel.StartupTaskState.DisabledByUser or Windows.ApplicationModel.StartupTaskState.DisabledByPolicy;
+
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private static readonly string[] VerbKeys = { @"Software\Classes\*\shell\Lobster", @"Software\Classes\Directory\shell\Lobster" };
 
@@ -34,11 +68,22 @@ public static class Shell
     {
         get
         {
+            if (IsPackaged)
+                return PackagedStartupState() is Windows.ApplicationModel.StartupTaskState.Enabled or Windows.ApplicationModel.StartupTaskState.EnabledByPolicy;
             using var k = Registry.CurrentUser.OpenSubKey(RunKey);
             return k?.GetValue("Lobster") is string s && s.Contains(ExePath, StringComparison.OrdinalIgnoreCase);
         }
         set
         {
+            if (IsPackaged)
+            {
+                System.Threading.Tasks.Task.Run(async () =>
+                {
+                    var task = await Windows.ApplicationModel.StartupTask.GetAsync(StartupTaskId);
+                    if (value) await task.RequestEnableAsync(); else task.Disable();
+                }).GetAwaiter().GetResult();
+                return;
+            }
             using var k = Registry.CurrentUser.CreateSubKey(RunKey);
             if (value) k.SetValue("Lobster", $"\"{ExePath}\" --background");
             else k.DeleteValue("Lobster", false);

@@ -1,0 +1,30 @@
+# Builds the Microsoft Store package (.msix) and keeps it as a workflow artifact,
+# ready to upload in Partner Center. Identity values: Settings › Secrets and variables ›
+# Actions › Variables (MSIX_IDENTITY, MSIX_PUBLISHER, MSIX_PUBLISHER_DISPLAY), copied from
+# Partner Center › Lobster › Product identity.
+name: Store package
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  msix:
+    runs-on: windows-latest
+    env:
+      MSIX_IDENTITY: ${{ vars.MSIX_IDENTITY }}
+      MSIX_PUBLISHER: ${{ vars.MSIX_PUBLISHER }}
+      MSIX_PUBLISHER_DISPLAY: ${{ vars.MSIX_PUBLISHER_DISPLAY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build MSIX
+        shell: pwsh
+        run: ./packaging/msix/build-msix.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lobster-msix
+          path: dist/*.msix

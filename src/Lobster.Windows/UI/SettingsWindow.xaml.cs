@@ -62,6 +62,13 @@ public partial class SettingsWindow : Window
         Notifs.IsChecked = s.Notifications;
         CustomHex.Text = s.CustomAccent ?? "#E8452C";
         UpdateCustomSwatch();
+        if (Shell.IsPackaged)
+        {
+            CtxMenu.Visibility = SendTo.Visibility = Visibility.Collapsed;
+            PackagedNote.Visibility = Visibility.Visible;
+            Links.Inlines.Remove(Links.Inlines.LastInline);   // "Remove Lobster from Windows": Windows does that
+            Links.Inlines.Remove(Links.Inlines.LastInline);   // and its separator
+        }
         try
         {
             Startup.IsChecked = Shell.StartsWithWindows;
@@ -108,7 +115,17 @@ public partial class SettingsWindow : Window
             BuildPalettes();
         };
 
-        Startup.Click += (_, _) => Try(() => Shell.StartsWithWindows = Startup.IsChecked == true);
+        Startup.Click += (_, _) => Try(() =>
+        {
+            Shell.StartsWithWindows = Startup.IsChecked == true;
+            if (Startup.IsChecked == true && Shell.StartupBlockedByUser)
+            {
+                Startup.IsChecked = false;
+                Dialog.Info(L("Démarrage", "Startup"), L(
+                    "Le lancement au démarrage a été désactivé dans le Gestionnaire des tâches. Réactivez-le dans Gestionnaire des tâches › Applications de démarrage › Lobster.",
+                    "Startup was turned off in Task Manager. Turn it back on in Task Manager › Startup apps › Lobster."));
+            }
+        });
         CtxMenu.Click += (_, _) => Try(() => Shell.ContextMenuInstalled = CtxMenu.IsChecked == true);
         SendTo.Click += (_, _) => Try(() => Shell.SendToInstalled = SendTo.IsChecked == true);
     }
@@ -120,7 +137,7 @@ public partial class SettingsWindow : Window
         App.Settings.Language = lang;
         App.Settings.Save();
         App.Current.RefreshTray();
-        try { if (Shell.SendToInstalled) Shell.SendToInstalled = true; } catch { }
+        try { if (!Shell.IsPackaged && Shell.SendToInstalled) Shell.SendToInstalled = true; } catch { }
         Dispatcher.BeginInvoke(() => App.Current.ReopenSettings(this));
     }
 

@@ -58,7 +58,7 @@ public partial class App : Application
         if (!first)
         {
             // A new build launched from outside the install folder while an older Lobster runs: update it.
-            if (e.Args.Length == 0 && !RunningFromInstallDir && OfferUpdate()) { Shutdown(); return; }
+            if (e.Args.Length == 0 && !Shell.IsPackaged && !RunningFromInstallDir && OfferUpdate()) { Shutdown(); return; }
             SingleInstance.Send(e.Args, () => Win32.AllowSetForegroundWindow(Win32.ASFW_ANY));
             Shutdown();
             return;
@@ -66,7 +66,7 @@ public partial class App : Application
 
         Log.Info($"start {Shell.ExePath} args={string.Join(' ', e.Args)}");
 
-        if (!RunningFromInstallDir && e.Args.Length == 0 && OfferInstall(update: File.Exists(Path.Combine(InstallDir, "Lobster.exe")))) return;
+        if (!Shell.IsPackaged && !RunningFromInstallDir && e.Args.Length == 0 && OfferInstall(update: File.Exists(Path.Combine(InstallDir, "Lobster.exe")))) return;
 
         AppState.Jobs = new JobManager(Settings.MaxParallelJobs);
         _menu = new RadialMenuWindow();
@@ -204,10 +204,18 @@ public partial class App : Application
     {
         try
         {
-            Shell.ContextMenuInstalled = true;
-            Shell.SendToInstalled = true;
-            Shell.StartsWithWindows = true;
-            Shell.EnsureStartMenuShortcut();
+            if (Shell.IsPackaged)
+            {
+                // Store build: Windows handles the Start menu and uninstall; "Open with" comes from the package.
+                Shell.StartsWithWindows = true;
+            }
+            else
+            {
+                Shell.ContextMenuInstalled = true;
+                Shell.SendToInstalled = true;
+                Shell.StartsWithWindows = true;
+                Shell.EnsureStartMenuShortcut();
+            }
         }
         catch (Exception ex) { Log.Error("first run: " + ex); }
         Settings.FirstRunDone = true;
@@ -315,7 +323,7 @@ public partial class App : Application
             _jobsWindow.Close();
             _jobsWindow = new JobsWindow(Jobs);
         }
-        try { if (Shell.ContextMenuInstalled) Shell.ContextMenuInstalled = true; } catch { }  // re-label verbs
+        try { if (!Shell.IsPackaged && Shell.ContextMenuInstalled) Shell.ContextMenuInstalled = true; } catch { }  // re-label verbs
     }
 
     public void Notify(string title, string text, string? revealPath = null)

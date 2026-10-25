@@ -84,6 +84,8 @@
                 <CheckBox x:Name="Startup" Content="{l:Tr Fr='Lancer Lobster au démarrage de Windows', En='Start Lobster with Windows'}"/>
                 <CheckBox x:Name="CtxMenu" Content="{l:Tr Fr='« Lobster… » dans le clic droit (Windows 11 : « Afficher plus d’options »)', En='“Lobster…” in the right-click menu (Windows 11: “Show more options”)'}"/>
                 <CheckBox x:Name="SendTo" Content="{l:Tr Fr='« Envoyer vers › Lobster » (accepte plusieurs fichiers d’un coup)', En='“Send to › Lobster” (accepts many files at once)'}"/>
+                <TextBlock x:Name="PackagedNote" Visibility="Collapsed" Style="{StaticResource Dim}" FontSize="12" Margin="0,4,0,0"
+                           Text="{l:Tr Fr='Version Microsoft Store : clic droit sur un fichier › Ouvrir avec › Lobster. Mises à jour et désinstallation passent par Windows.', En='Microsoft Store version: right-click a file › Open with › Lobster. Updates and uninstall go through Windows.'}"/>
                 <CheckBox x:Name="Notifs" Content="{l:Tr Fr='Notification quand un lot est terminé', En='Notify me when a batch is done'}"/>
 
                 <!-- Tools -->
@@ -92,7 +94,7 @@
                     <StackPanel x:Name="ToolList"/>
                 </Border>
 
-                <TextBlock Margin="0,22,0,0" Style="{StaticResource Dim}" FontSize="12">
+                <TextBlock x:Name="Links" Margin="0,22,0,0" Style="{StaticResource Dim}" FontSize="12">
                     <Hyperlink Click="OnOpenLog" Foreground="{StaticResource TextDim}"><Run Text="{l:Tr Fr='Journal', En='Log'}"/></Hyperlink>
                     <Run Text="  ·  "/>
                     <Hyperlink Click="OnUninstall" Foreground="{StaticResource TextDim}"><Run Text="{l:Tr Fr='Retirer Lobster de Windows', En='Remove Lobster from Windows'}"/></Hyperlink>

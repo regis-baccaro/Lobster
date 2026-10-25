@@ -26,7 +26,13 @@
   </PropertyGroup>
 
   <!-- Default publish: one self-contained Lobster.exe. Pass -p:Light=true for a small build that uses the installed .NET 8 Desktop runtime. -->
-  <PropertyGroup Condition="'$(Light)' != 'true'">
+  <!-- -p:Store=true: self-contained folder for the Microsoft Store package (packaging/msix/build-msix.ps1). -->
+  <PropertyGroup Condition="'$(Store)' == 'true'">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <DefineConstants>$(DefineConstants);STORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Light)' != 'true' And '$(Store)' != 'true'">
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
