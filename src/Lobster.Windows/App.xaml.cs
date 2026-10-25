@@ -50,7 +50,10 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += (_, ex) => Log.Error("domain: " + ex.ExceptionObject);
         TaskScheduler.UnobservedTaskException += (_, ex) => { Log.Error("task: " + ex.Exception); ex.SetObserved(); };
 
-        _mutex = new Mutex(true, @"Local\FreiaTech.Lobster", out bool first);
+        _mutex = new Mutex(false, @"Local\FreiaTech.Lobster");
+        bool first;
+        try { first = _mutex.WaitOne(0); }
+        catch (AbandonedMutexException) { first = true; }
         _ownsMutex = first;
         if (!first)
         {
@@ -121,17 +124,26 @@ public partial class App : Application
             if (got) m.ReleaseMutex();
         }
         catch (Exception ex) { Log.Error("update wait: " + ex.Message); }
-        Thread.Sleep(500);
+        _mutex?.Dispose();
+        _mutex = null;
+        _ownsMutex = false;
 
+        // The old Lobster.exe stays locked until its process is fully gone: retry for a few seconds.
+        Exception? last = null;
+        for (int i = 0; i < 24; i++)
+        {
+            try { CopyToInstallDir(); last = null; break; }
+            catch (Exception ex) { last = ex; Thread.Sleep(250); }
+        }
         try
         {
-            CopyToInstallDir();
             Process.Start(new ProcessStartInfo(Path.Combine(InstallDir, "Lobster.exe")) { UseShellExecute = false, WorkingDirectory = InstallDir });
         }
-        catch (Exception ex)
+        catch (Exception ex) { last ??= ex; }
+        if (last != null)
         {
-            Log.Error("update: " + ex);
-            Dialog.Error(Loc.L("Mise à jour", "Update"), Loc.L("Copie impossible : ", "Could not copy: ") + ex.Message);
+            Log.Error("update: " + last);
+            Dialog.Error(Loc.L("Mise à jour", "Update"), Loc.L("Copie impossible : ", "Could not copy: ") + last.Message);
         }
         return true;
     }
@@ -221,10 +233,23 @@ public partial class App : Application
             _settingsWindow.Activate();
             return;
         }
-        _settingsWindow = new SettingsWindow(welcome);
-        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
-        _settingsWindow.Show();
-        _settingsWindow.Activate();
+        Track(new SettingsWindow(welcome));
+    }
+
+    /// <summary>Language switch: replace the settings window at the same place and size.</summary>
+    public void ReopenSettings(SettingsWindow old)
+    {
+        var next = new SettingsWindow { Left = old.Left, Top = old.Top, Width = old.Width, Height = old.Height, WindowStartupLocation = WindowStartupLocation.Manual };
+        Track(next);
+        old.Close();
+    }
+
+    private void Track(SettingsWindow w)
+    {
+        _settingsWindow = w;
+        w.Closed += (_, _) => { if (ReferenceEquals(_settingsWindow, w)) _settingsWindow = null; };
+        w.Show();
+        w.Activate();
     }
 
     private void OpenFilesFromTray()
@@ -285,6 +310,11 @@ public partial class App : Application
     public void RefreshTray()
     {
         BuildTrayMenu();
+        if (_jobsWindow != null && !_jobsWindow.IsVisible)
+        {
+            _jobsWindow.Close();
+            _jobsWindow = new JobsWindow(Jobs);
+        }
         try { if (Shell.ContextMenuInstalled) Shell.ContextMenuInstalled = true; } catch { }  // re-label verbs
     }
 
@@ -317,6 +347,7 @@ public partial class App : Application
 
     public void Quit()
     {
+        Settings.Save();
         try { _hook?.Dispose(); } catch { }
         if (_tray != null) { _tray.Visible = false; _tray.Dispose(); _tray = null; }
         foreach (var j in Jobs?.All.Where(j => j.IsActive).ToList() ?? new List<Job>()) j.Cts.Cancel();

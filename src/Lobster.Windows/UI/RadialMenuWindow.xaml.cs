@@ -128,6 +128,19 @@ public partial class RadialMenuWindow : Window
     public void ShowClickMode(IReadOnlyList<string> files, bool preview = false)
     {
         if (files.Count == 0) return;
+        if (System.Windows.Interop.ComponentDispatcher.IsThreadModal)
+        {
+            // A Lobster dialog is open (crop, trim…): show the menu once it closes.
+            var wait = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+            wait.Tick += (_, _) =>
+            {
+                if (System.Windows.Interop.ComponentDispatcher.IsThreadModal) return;
+                wait.Stop();
+                ShowClickMode(files, preview);
+            };
+            wait.Start();
+            return;
+        }
         _preview = preview;
         LoadPalette();
         _releaseTimer.Stop();

@@ -131,7 +131,7 @@ public sealed class MacGestureMonitor : IGestureMonitor
     private delegate IntPtr TapCallback(IntPtr proxy, uint type, IntPtr evt, IntPtr userInfo);
 
     [DllImport(CG)] private static extern IntPtr CGEventTapCreate(uint tap, uint place, uint options, ulong mask, TapCallback cb, IntPtr userInfo);
-    [DllImport(CG)] private static extern void CGEventTapEnable(IntPtr tap, bool enable);
+    [DllImport(CG)] private static extern void CGEventTapEnable(IntPtr tap, [MarshalAs(UnmanagedType.I1)] bool enable);
     [DllImport(CG)] private static extern CGPoint CGEventGetLocation(IntPtr evt);
     [DllImport(CG)] private static extern ulong CGEventGetFlags(IntPtr evt);
     [DllImport(CG)] [return: MarshalAs(UnmanagedType.I1)] private static extern bool CGPreflightListenEventAccess();
@@ -151,8 +151,8 @@ public sealed class MacGestureMonitor : IGestureMonitor
     public event Action<int, int>? Pressed;
     public string Name => "macOS";
 
-    /// <summary>Points → pixels for the screen under the cursor (set by the app from Avalonia's Screens).</summary>
-    public Func<double, double, (int x, int y)> ToPixels { get; set; } = (x, y) => ((int)x, (int)y);
+    /// <summary>Quartz points are also Avalonia's window coordinates on macOS: no conversion.</summary>
+    private static (int x, int y) ToPixels(double x, double y) => ((int)Math.Round(x), (int)Math.Round(y));
 
     public static bool HasPermission
     {
@@ -172,7 +172,6 @@ public sealed class MacGestureMonitor : IGestureMonitor
 
     public bool Start()
     {
-        if (!HasPermission) { RequestPermission(); if (!HasPermission) return false; }
         var ready = new ManualResetEventSlim();
         bool ok = false;
         _thread = new Thread(() =>
@@ -182,7 +181,13 @@ public sealed class MacGestureMonitor : IGestureMonitor
                 _cb = Callback;
                 ulong mask = (1UL << (int)LeftDown) | (1UL << (int)LeftUp) | (1UL << (int)LeftDragged);
                 _tap = CGEventTapCreate(SessionEventTap, HeadInsert, ListenOnly, mask, _cb, IntPtr.Zero);
-                if (_tap == IntPtr.Zero) { ready.Set(); return; }
+                if (_tap == IntPtr.Zero)
+                {
+                    // Only now ask macOS for "Input Monitoring"; the app retries the tap afterwards.
+                    if (!HasPermission) RequestPermission();
+                    ready.Set();
+                    return;
+                }
                 var source = CFMachPortCreateRunLoopSource(IntPtr.Zero, _tap, 0);
                 _runLoop = CFRunLoopGetCurrent();
                 var cf = NativeLibrary.Load(CF);

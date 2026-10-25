@@ -68,6 +68,13 @@ public static class Kit
         return b;
     }
 
+    /// <summary>
+    /// Factor from layout units (DIPs) to the units of Window.Position / Screen.Bounds.
+    /// X11 uses device pixels; Avalonia on macOS uses points, so no scaling there.
+    /// </summary>
+    public static double PositionScale(Avalonia.Platform.Screen? screen) =>
+        OperatingSystem.IsMacOS() ? 1 : screen?.Scaling ?? 1;
+
     /// <summary>Whether a modal Lobster dialog is open (the gesture stays quiet meanwhile).</summary>
     public static int ModalDepth;
 

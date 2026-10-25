@@ -67,9 +67,11 @@ public sealed class Settings
         _saveTimer.Change(800, System.Threading.Timeout.Infinite);
     }
 
+    private static readonly object SaveGate = new();
+
     public void Save()
     {
-        try { File.WriteAllText(FilePath, JsonSerializer.Serialize(this, Json)); }
+        try { lock (SaveGate) File.WriteAllText(FilePath, JsonSerializer.Serialize(this, Json)); }
         catch (Exception ex) { Log.Error("settings save: " + ex.Message); }
     }
 }

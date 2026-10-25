@@ -106,34 +106,26 @@ public partial class App : Application
     {
         _gesture = GestureMonitors.Create();
         if (_gesture == null) return;
-        if (_gesture is MacGestureMonitor mac) mac.ToPixels = MacPointsToPixels;
         _gesture.Triggered += (x, y) => Dispatcher.UIThread.Post(() => { if (Kit.ModalDepth == 0) _menu.ArmForDrag(new PixelPoint(x, y)); });
         _gesture.Released += () => Dispatcher.UIThread.Post(_menu.OnDragReleased);
         _gesture.Pressed += (x, y) => Dispatcher.UIThread.Post(() => _menu.OnGlobalMouseDown(new PixelPoint(x, y)));
-        if (!_gesture.Start())
+        if (_gesture.Start()) return;
+        Log.Info($"gesture monitor {_gesture.Name} unavailable");
+        if (_gesture is MacGestureMonitor)
         {
-            Log.Info($"gesture monitor {_gesture.Name} unavailable");
-            _gesture.Dispose();
-            _gesture = null;
-        }
-    }
-
-    /// <summary>Quartz reports points; Avalonia positions windows in pixels.</summary>
-    private (int, int) MacPointsToPixels(double x, double y)
-    {
-        double scale = 1;
-        try
-        {
-            var screens = _menu.Screens.All;
-            foreach (var s in screens)
+            // macOS asks for "Input Monitoring" once; keep trying for a few minutes while the user answers.
+            int tries = 0;
+            var retry = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            retry.Tick += (_, _) =>
             {
-                var b = s.Bounds;
-                double sx = b.X / s.Scaling, sy = b.Y / s.Scaling, sw = b.Width / s.Scaling, sh = b.Height / s.Scaling;
-                if (x >= sx && x < sx + sw && y >= sy && y < sy + sh) { scale = s.Scaling; break; }
-            }
+                if (_gesture == null || ++tries > 60) { retry.Stop(); return; }
+                if (_gesture.Start()) { retry.Stop(); Log.Info("gesture monitor started"); }
+            };
+            retry.Start();
+            return;
         }
-        catch { }
-        return ((int)Math.Round(x * scale), (int)Math.Round(y * scale));
+        _gesture.Dispose();
+        _gesture = null;
     }
 
     public void RefreshBubble()
@@ -174,10 +166,22 @@ public partial class App : Application
     public void OpenSettings(bool welcome = false)
     {
         if (_settings is { IsVisible: true }) { _settings.Activate(); return; }
-        _settings = new SettingsWindow(welcome);
-        _settings.Closed += (_, _) => _settings = null;
-        _settings.Show();
-        _settings.Activate();
+        Track(new SettingsWindow(welcome));
+    }
+
+    /// <summary>Language switch: replace the settings window at the same place and size.</summary>
+    public void ReopenSettings(SettingsWindow old)
+    {
+        Track(new SettingsWindow { Width = old.Width, Height = old.Height, Position = old.Position, WindowStartupLocation = WindowStartupLocation.Manual });
+        old.Close();
+    }
+
+    private void Track(SettingsWindow w)
+    {
+        _settings = w;
+        w.Closed += (_, _) => { if (ReferenceEquals(_settings, w)) _settings = null; };
+        w.Show();
+        w.Activate();
     }
 
     private async void OpenFiles()
@@ -295,6 +299,7 @@ public partial class App : Application
 
     public void Quit()
     {
+        AppState.Settings.Save();
         try { _gesture?.Dispose(); } catch { }
         foreach (var j in AppState.Jobs.All.Where(j => j.IsActive).ToList()) j.Cts.Cancel();
         try { Directory.Delete(Path.Combine(Path.GetTempPath(), "Lobster"), true); } catch { }

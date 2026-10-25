@@ -44,6 +44,11 @@ public sealed class SettingsWindow : Window
         header.Children.Add(titles);
         body.Children.Add(header);
 
+        if (Integration.MacTranslocated)
+            body.Children.Add(Warn(L("Déplacez Lobster.app dans le dossier Applications, puis relancez-le : macOS l'exécute pour l'instant depuis une copie temporaire.",
+                                     "Move Lobster.app to the Applications folder, then open it again: macOS is currently running it from a temporary copy."),
+                Kit.Btn(L("Quitter", "Quit"), () => App.Current.Quit())));
+
         if (_welcome)
             body.Children.Add(new Border
             {
@@ -197,9 +202,7 @@ public sealed class SettingsWindow : Window
         S.Save();
         App.Current.RefreshTray();
         if (OperatingSystem.IsLinux() && Integration.LinuxIntegrated) Try(Integration.InstallLinux);
-        var next = new SettingsWindow { Width = Width, Height = Height, Position = Position, WindowStartupLocation = WindowStartupLocation.Manual };
-        next.Show();
-        Close();
+        App.Current.ReopenSettings(this);
     }
 
     private void Try(Action a)

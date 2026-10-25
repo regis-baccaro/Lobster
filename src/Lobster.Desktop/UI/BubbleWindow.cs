@@ -97,7 +97,7 @@ public sealed class BubbleWindow : Window
         if (s.BubbleX is int x && s.BubbleY is int y && Screens.All.Any(sc => sc.Bounds.Contains(new PixelPoint(x + 10, y + 10))))
             p = new PixelPoint(x, y);
         else if (screen != null)
-            p = new PixelPoint((int)(screen.WorkingArea.Right - 110 * screen.Scaling), (int)(screen.WorkingArea.Y + screen.WorkingArea.Height * 0.55));
+            p = new PixelPoint((int)(screen.WorkingArea.Right - 110 * Kit.PositionScale(screen)), (int)(screen.WorkingArea.Y + screen.WorkingArea.Height * 0.55));
         else p = new PixelPoint(100, 100);
         Position = p;
         Show();

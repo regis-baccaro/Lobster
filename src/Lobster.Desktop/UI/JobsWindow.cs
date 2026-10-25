@@ -146,7 +146,7 @@ public sealed class JobsWindow : Window
         var screen = Screens.Primary ?? Screens.All.FirstOrDefault();
         if (screen == null) return;
         var wa = screen.WorkingArea;
-        double s = screen.Scaling;
+        double s = Kit.PositionScale(screen);
         Position = new PixelPoint((int)(wa.Right - Bounds.Width * s - 4 * s), (int)(wa.Bottom - Bounds.Height * s - 4 * s));
     }
 }

@@ -335,7 +335,7 @@ public sealed class RadialMenuWindow : Window
     private void ShowAt(PixelPoint at, bool activate)
     {
         var screen = Screens.ScreenFromPoint(at) ?? Screens.Primary ?? Screens.All.FirstOrDefault();
-        double s = screen?.Scaling ?? 1;
+        double s = Kit.PositionScale(screen);
         var wa = screen?.WorkingArea ?? new PixelRect(0, 0, 3840, 2160);
         double margin = (Cx - RCatch) * s;
         double left = at.X - Cx * s, top = at.Y - Cy * s;
