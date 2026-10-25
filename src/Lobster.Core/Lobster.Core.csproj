@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>Lobster</RootNamespace>
+    <AssemblyName>Lobster.Core</AssemblyName>
+    <Version>1.1.0</Version>
+    <Company>Freia tech</Company>
+    <NoWarn>$(NoWarn);CA1416;NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- AnyCPU ships natives for win-x64/arm64, linux-x64/arm64 and osx-arm64; publish picks the RID. -->
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="15.0.0" />
+    <PackageReference Include="Markdig" Version="1.5.0" />
+    <PackageReference Include="PdfPig" Version="0.1.16" />
+    <!-- 6.2.4 is the last PDFsharp release under MIT; 6.5+ is AGPL / commercial. Keep pinned. -->
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
+  </ItemGroup>
+</Project>

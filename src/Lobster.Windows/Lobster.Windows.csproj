@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>Lobster</AssemblyName>
+    <RootNamespace>Lobster</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\lobster.ico</ApplicationIcon>
+    <Company>Freia tech</Company>
+    <Product>Lobster</Product>
+    <Authors>Freia tech</Authors>
+    <Copyright>© 2026 Freia tech</Copyright>
+    <Description>Lobster — convert and edit files by dragging them with Shift.</Description>
+    <Version>1.1.0</Version>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <DebugType>none</DebugType>
+    <SatelliteResourceLanguages>fr;en</SatelliteResourceLanguages>
+    <NoWarn>$(NoWarn);CA1416;NU1701;WFAC010</NoWarn>
+  </PropertyGroup>
+
+  <!-- Default publish: one self-contained Lobster.exe. Pass -p:Light=true for a small build that uses the installed .NET 8 Desktop runtime. -->
+  <PropertyGroup Condition="'$(Light)' != 'true'">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Light)' == 'true'">
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lobster.Core\Lobster.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\lobster.png" />
+    <Resource Include="Assets\lobster.ico" />
+  </ItemGroup>
+</Project>

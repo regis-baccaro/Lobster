@@ -1,0 +1,20 @@
+<Window x:Class="Lobster.RadialMenuWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Lobster" Width="620" Height="690"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
+        AllowDrop="True" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        FontFamily="Segoe UI Variable Text, Segoe UI" Focusable="True"
+        TextOptions.TextFormattingMode="Ideal">
+    <Canvas x:Name="Stage" Width="620" Height="690">
+        <!-- Nearly invisible disc: makes the whole menu area a drop target. -->
+        <Ellipse x:Name="Catcher" Width="592" Height="592" Canvas.Left="14" Canvas.Top="14" Fill="#01000000"/>
+        <Canvas x:Name="Layer" Width="620" Height="690" Opacity="0" IsHitTestVisible="False"
+                RenderTransformOrigin="0.5,0.4493">
+            <Canvas.RenderTransform>
+                <ScaleTransform x:Name="Zoom" ScaleX="1" ScaleY="1"/>
+            </Canvas.RenderTransform>
+        </Canvas>
+    </Canvas>
+</Window>

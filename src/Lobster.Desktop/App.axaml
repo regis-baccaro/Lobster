@@ -1,0 +1,63 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Lobster.App"
+             RequestedThemeVariant="Dark"
+             Name="Lobster">
+    <Application.Styles>
+        <FluentTheme />
+        <Style Selector="Window">
+            <Setter Property="Background" Value="#161618"/>
+            <Setter Property="Foreground" Value="#F2F2F4"/>
+            <Setter Property="FontFamily" Value="fonts:Inter#Inter, $Default"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="TextBlock.dim">
+            <Setter Property="Foreground" Value="#A0A0AA"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style Selector="TextBlock.h">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,18,0,8"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="7"/>
+            <Setter Property="Padding" Value="14,7"/>
+        </Style>
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="#E8452C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#F25B41"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.chip">
+            <Setter Property="Padding" Value="11,5"/>
+            <Setter Property="Margin" Value="0,0,6,6"/>
+        </Style>
+        <Style Selector="Button.ghost">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="8,5"/>
+        </Style>
+        <Style Selector="ProgressBar">
+            <Setter Property="Foreground" Value="#E8452C"/>
+            <Setter Property="MinHeight" Value="4"/>
+            <Setter Property="Height" Value="4"/>
+        </Style>
+        <Style Selector="RadioButton, CheckBox, ToggleSwitch">
+            <Setter Property="Margin" Value="0,2,12,2"/>
+        </Style>
+    </Application.Styles>
+    <Application.Resources>
+        <!-- Lobster red instead of Fluent blue for checkboxes, radios, accent buttons, focus. -->
+        <Color x:Key="SystemAccentColor">#E8452C</Color>
+        <Color x:Key="SystemAccentColorDark1">#D13B23</Color>
+        <Color x:Key="SystemAccentColorDark2">#B8321D</Color>
+        <Color x:Key="SystemAccentColorDark3">#9C2917</Color>
+        <Color x:Key="SystemAccentColorLight1">#F25B41</Color>
+        <Color x:Key="SystemAccentColorLight2">#F67A63</Color>
+        <Color x:Key="SystemAccentColorLight3">#F99C8A</Color>
+    </Application.Resources>
+</Application>
