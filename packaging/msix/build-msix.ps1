@@ -26,15 +26,15 @@ $groups = [ordered]@{
 $ft = foreach ($g in $groups.GetEnumerator()) {
   $types = ($g.Value -split ' ' | ForEach-Object { "                <uap:FileType>.$_</uap:FileType>" }) -join "`n"
 @"
-        <uap:Extension Category="windows.fileTypeAssociation">
-          <uap:FileTypeAssociation Name="$($g.Key)" desktop:MultiSelectModel="Player">
+        <uap3:Extension Category="windows.fileTypeAssociation">
+          <uap3:FileTypeAssociation Name="$($g.Key)" desktop4:MultiSelectModel="Player">
             <uap:DisplayName>Lobster</uap:DisplayName>
             <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
             <uap:SupportedFileTypes>
 $types
             </uap:SupportedFileTypes>
-          </uap:FileTypeAssociation>
-        </uap:Extension>
+          </uap3:FileTypeAssociation>
+        </uap3:Extension>
 "@
 }
 $esc = [System.Security.SecurityElement]
