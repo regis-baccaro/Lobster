@@ -9,6 +9,7 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        Tools.ExtendPathForMac();
         AppState.Settings = Settings.Load();
 
         // One Lobster per session: a second launch (file manager action, "Open with") forwards its files.

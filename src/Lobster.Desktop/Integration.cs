@@ -116,6 +116,9 @@ public static class Integration
 
     public static bool MacIntegrated => Directory.Exists(QuickAction);
 
+    /// <summary>macOS runs a quarantined app from a temporary copy until it is moved to Applications.</summary>
+    public static bool MacTranslocated => OperatingSystem.IsMacOS() && Exe.Contains("/AppTranslocation/");
+
     public static void InstallMac()
     {
         var contents = Path.Combine(QuickAction, "Contents");
@@ -136,7 +139,8 @@ public static class Integration
             </dict>
             </plist>
             """);
-        var cmd = System.Security.SecurityElement.Escape($"{Q(Exe)} \"$@\" >/dev/null 2>&1 &");
+        // Through the bundle id: works wherever Lobster.app lives, files arrive as "open documents".
+        var cmd = System.Security.SecurityElement.Escape("/usr/bin/open -b tech.freia.lobster \"$@\"");
         Write(Path.Combine(contents, "document.wflow"), $$"""
             <?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -225,7 +229,7 @@ public static class Integration
                     <plist version="1.0">
                     <dict>
                       <key>Label</key><string>tech.freia.lobster</string>
-                      <key>ProgramArguments</key><array><string>{System.Security.SecurityElement.Escape(Exe)}</string><string>--background</string></array>
+                      <key>ProgramArguments</key><array><string>/usr/bin/open</string><string>-b</string><string>tech.freia.lobster</string><string>--args</string><string>--background</string></array>
                       <key>RunAtLoad</key><true/>
                       <key>ProcessType</key><string>Interactive</string>
                     </dict>

@@ -47,10 +47,14 @@ propose de **mettre à jour** la version installée. Variante « light » (21 Mo
 (sans sudo ; `./install.sh --uninstall` pour retirer). Moteurs : `ffmpeg`, `poppler-utils`,
 `libreoffice` (facultatif) — le script indique la commande pour votre distribution.
 
-**macOS (Apple Silicon, 11+)** — dézippez, glissez **Lobster.app** dans Applications, puis
-clic droit › **Ouvrir** la première fois (application non notariée). Autorisez Lobster dans
-*Réglages Système › Confidentialité et sécurité › Surveillance de l'entrée* pour Maj + glisser.
-Moteurs : `brew install ffmpeg poppler` et `brew install --cask libreoffice` (facultatif).
+**macOS (Apple Silicon, 11+)** — dézippez et glissez **Lobster.app** dans **Applications**
+(important : lancée depuis Téléchargements, macOS l'exécute depuis une copie temporaire).
+L'app est signée ad hoc mais pas notariée : au premier lancement, clic droit › **Ouvrir** ;
+sur macOS 15, *Réglages Système › Confidentialité et sécurité › Ouvrir quand même*
+(ou `xattr -dr com.apple.quarantine /Applications/Lobster.app`).
+Pour Maj + glisser, autorisez Lobster dans *Surveillance de l'entrée* si macOS le demande.
+Moteurs : `brew install ffmpeg poppler` et `brew install --cask libreoffice` (facultatif) —
+Lobster les trouve dans `/opt/homebrew/bin` même lancé depuis le Finder.
 
 ## Compiler · Build
 

@@ -63,7 +63,7 @@ public static class Tools
         }
         else
         {
-            list.AddRange(new[] { "/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/snap/bin/ffmpeg", "/var/lib/flatpak/exports/bin/ffmpeg",
+            list.AddRange(new[] { "/opt/homebrew/bin/ffmpeg", "/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/snap/bin/ffmpeg", "/var/lib/flatpak/exports/bin/ffmpeg",
                 Path.Combine(Home, ".local", "bin", "ffmpeg") });
         }
         return list;
@@ -84,14 +84,14 @@ public static class Tools
 
     public static string? Ghostscript => Find("gs", () =>
     {
-        if (!IsWindows) return new[] { FromPath("gs"), "/usr/bin/gs", "/usr/local/bin/gs" };
+        if (!IsWindows) return new[] { FromPath("gs"), "/opt/homebrew/bin/gs", "/usr/bin/gs", "/usr/local/bin/gs" };
         var list = new List<string?> { FromPath("gswin64c.exe") };
         list.AddRange(Glob(Path.Combine(ProgramFiles, "gs"), "gs*", "gswin64c.exe").OrderByDescending(x => x));
         return list;
     });
 
     /// <summary>Poppler's renderer (Linux): sharp, fast PDF → image.</summary>
-    public static string? Pdftoppm => Find("pdftoppm", () => new[] { FromPath(Exe("pdftoppm")), "/usr/bin/pdftoppm", "/usr/local/bin/pdftoppm" });
+    public static string? Pdftoppm => Find("pdftoppm", () => new[] { FromPath(Exe("pdftoppm")), "/opt/homebrew/bin/pdftoppm", "/usr/bin/pdftoppm", "/usr/local/bin/pdftoppm" });
 
     // ---------------------------------------------------------------- office
 
@@ -104,7 +104,8 @@ public static class Tools
         }
         : new[]
         {
-            FromPath("soffice"), FromPath("libreoffice"), "/usr/bin/soffice", "/usr/bin/libreoffice",
+            FromPath("soffice"), FromPath("libreoffice"), "/Applications/LibreOffice.app/Contents/MacOS/soffice",
+            "/opt/homebrew/bin/soffice", "/usr/bin/soffice", "/usr/bin/libreoffice",
             "/usr/lib/libreoffice/program/soffice", "/opt/libreoffice/program/soffice", "/snap/bin/libreoffice",
         });
 
@@ -150,9 +151,23 @@ public static class Tools
         }
     }
 
-    /// <summary>Package-manager command that installs a tool on this Linux distribution.</summary>
+    /// <summary>
+    /// macOS apps started from Finder get PATH=/usr/bin:/bin:/usr/sbin:/sbin — add Homebrew's folders
+    /// (Apple Silicon and Intel) so ffmpeg, ffprobe, gs, pdftoppm installed with brew are found.
+    /// </summary>
+    public static void ExtendPathForMac()
+    {
+        if (!OperatingSystem.IsMacOS()) return;
+        var path = Environment.GetEnvironmentVariable("PATH") ?? "/usr/bin:/bin";
+        foreach (var dir in new[] { "/usr/local/bin", "/opt/homebrew/bin" })
+            if (!path.Split(':').Contains(dir)) path = dir + ":" + path;
+        Environment.SetEnvironmentVariable("PATH", path);
+    }
+
+    /// <summary>Package-manager command that installs a tool (Homebrew on macOS, the distribution's on Linux).</summary>
     public static string LinuxInstallCommand(string debName, string rpmName, string archName)
     {
+        if (OperatingSystem.IsMacOS()) return $"brew install {(archName == "libreoffice-fresh" ? "--cask libreoffice" : archName)}";
         if (FromPath("apt") != null) return $"sudo apt install {debName}";
         if (FromPath("dnf") != null) return $"sudo dnf install {rpmName}";
         if (FromPath("pacman") != null) return $"sudo pacman -S {archName}";

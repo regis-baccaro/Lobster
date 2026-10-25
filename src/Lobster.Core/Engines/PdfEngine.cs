@@ -190,8 +190,8 @@ public static class PdfEngine
                 }, ct);
             else
                 throw new ToolMissingException("poppler", L(
-                    "Pour transformer un PDF en images, installez poppler-utils : " + Tools.LinuxInstallCommand("poppler-utils", "poppler-utils", "poppler"),
-                    "To turn a PDF into images, install poppler-utils: " + Tools.LinuxInstallCommand("poppler-utils", "poppler-utils", "poppler")));
+                    "Pour transformer un PDF en images, installez Poppler : " + Tools.LinuxInstallCommand("poppler-utils", "poppler-utils", "poppler"),
+                    "To turn a PDF into images, install Poppler: " + Tools.LinuxInstallCommand("poppler-utils", "poppler-utils", "poppler")));
 
             var pages = Directory.GetFiles(tmp, "p-*.png").OrderBy(f => f, StringComparer.Ordinal).ToList();
             if (pages.Count == 0)

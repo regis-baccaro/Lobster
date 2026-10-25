@@ -17,7 +17,9 @@ public partial class JobsWindow : Window
     {
         InitializeComponent();
         List.ItemsSource = jobs.All;
-        jobs.Changed += () => Ui.Post(OnChanged);
+        Action changed = () => Ui.Post(OnChanged);
+        jobs.Changed += changed;
+        Closed += (_, _) => { jobs.Changed -= changed; _autoHide.Stop(); };
         _autoHide.Tick += (_, _) =>
         {
             if (IsMouseOver || App.Jobs.AnyActive) return;

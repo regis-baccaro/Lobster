@@ -121,12 +121,7 @@ public partial class SettingsWindow : Window
         App.Settings.Save();
         App.Current.RefreshTray();
         try { if (Shell.SendToInstalled) Shell.SendToInstalled = true; } catch { }
-        Dispatcher.BeginInvoke(() =>
-        {
-            var next = new SettingsWindow { Left = Left, Top = Top, Width = Width, Height = Height, WindowStartupLocation = WindowStartupLocation.Manual };
-            next.Show();
-            Close();
-        });
+        Dispatcher.BeginInvoke(() => App.Current.ReopenSettings(this));
     }
 
     private void Try(Action a)
