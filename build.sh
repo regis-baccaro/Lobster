@@ -44,7 +44,7 @@ if [[ $what == all || $what == macos ]]; then
   chmod +x "$APP/Contents/MacOS/lobster"
   # Apple Silicon refuses to run unsigned code: ad-hoc sign the whole bundle (no Apple ID needed).
   if command -v rcodesign >/dev/null 2>&1; then
-    rcodesign sign "$APP" >/dev/null
+    rcodesign sign --config-file /dev/null "$APP" >/dev/null
   elif [[ "$(uname)" == Darwin ]]; then
     codesign --force --deep --sign - "$APP"
   else
