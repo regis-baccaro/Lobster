@@ -33,6 +33,11 @@ Lobster never overwrites a file: results get a new name — `photo (compressed).
 The modifier key (Shift, Ctrl/Control, Alt/Option), the language, the radial menu palette
 (8 palettes + a custom color) and where created files go are all set in Settings.
 
+## Download
+
+Get the latest version from the **[Releases page](https://github.com/regis-baccaro/Lobster/releases/latest)**:
+`…-windows-x64.exe` · `…-linux-x64.tar.gz` · `…-macos-arm64.zip`.
+
 ## Install
 
 **Windows 10/11** — run `Lobster-…-windows-x64.exe`; it installs itself into
@@ -59,6 +64,9 @@ Lobster finds them in `/opt/homebrew/bin` even when started from Finder.
 ./build.sh            # → dist/: Windows exe + light zip, Linux tar.gz, macOS .app zip
 ./build.sh linux      # or windows / macos
 ```
+
+Releases are built and published by GitHub Actions (`.github/workflows/release.yml`) whenever a
+version tag is pushed: `git tag v1.2.0 && git push origin v1.2.0`.
 
 Requires the .NET 8 SDK and works from any OS (`EnableWindowsTargeting`). For macOS, `build.sh`
 ad-hoc signs the app with [`rcodesign`](https://github.com/indygreg/apple-platform-rs) when it is

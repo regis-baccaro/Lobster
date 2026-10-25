@@ -4,7 +4,7 @@
 #   ./build.sh windows|linux|macos
 set -euo pipefail
 cd "$(dirname "$0")"
-VERSION=$(grep -m1 -oP '(?<=<Version>)[^<]+' src/Lobster.Core/Lobster.Core.csproj)
+VERSION=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/Lobster.Core/Lobster.Core.csproj | head -1)
 DIST="$PWD/dist"
 OUT="$PWD/.publish"
 what="${1:-all}"

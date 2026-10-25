@@ -1,0 +1,58 @@
+# Builds Windows, Linux and macOS packages and publishes them as a GitHub Release.
+# Trigger: push a tag such as v1.1.0 (git tag v1.1.0 && git push origin v1.1.0),
+# or run it by hand from the Actions tab.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.1.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      RCODESIGN_VERSION: '0.29.0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install rcodesign (ad-hoc signing of the macOS app)
+        run: |
+          set -e
+          url="https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F${RCODESIGN_VERSION}/apple-codesign-${RCODESIGN_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          if curl -fsSL "$url" -o rcodesign.tgz; then
+            tar xzf rcodesign.tgz
+            sudo install "$(find . -type f -name rcodesign | head -1)" /usr/local/bin/rcodesign
+          else
+            cargo install apple-codesign --bin rcodesign --locked
+          fi
+          rcodesign --version
+
+      - name: Build packages
+        run: |
+          sudo apt-get install -y -qq zip >/dev/null
+          ./build.sh
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${TAG#v}"
+          sed "s/@VERSION@/$version/g" .github/release-notes.md > notes.md
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* --title "Lobster $version" --notes-file notes.md --latest
+          fi
