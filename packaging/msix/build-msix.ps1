@@ -27,7 +27,7 @@ $ft = foreach ($g in $groups.GetEnumerator()) {
   $types = ($g.Value -split ' ' | ForEach-Object { "                <uap:FileType>.$_</uap:FileType>" }) -join "`n"
 @"
         <uap3:Extension Category="windows.fileTypeAssociation">
-          <uap3:FileTypeAssociation Name="$($g.Key)" desktop4:MultiSelectModel="Player">
+          <uap3:FileTypeAssociation Name="$($g.Key)" MultiSelectModel="Player">
             <uap:DisplayName>Lobster</uap:DisplayName>
             <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
             <uap:SupportedFileTypes>
