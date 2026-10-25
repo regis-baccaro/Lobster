@@ -45,6 +45,10 @@ Get the latest version from the **[Releases page](https://github.com/regis-bacca
 **update** the installed one. A "light" build (21 MB) is available when the .NET 8 Desktop
 runtime is already installed. Audio/video needs ffmpeg, offered through winget on first use.
 
+The exe is not code-signed yet. To avoid the SmartScreen warning, right-click the downloaded
+file › **Properties** › tick **Unblock** › **OK** before running it (PowerShell:
+`Unblock-File .\Lobster-…-windows-x64.exe`), or click **More info › Run anyway** on the warning.
+
 **Linux (x64)** — `tar xzf Lobster-…-linux-x64.tar.gz && cd lobster-* && ./install.sh`
 (no sudo; `./install.sh --uninstall` to remove). Engines: `ffmpeg`, `poppler-utils`,
 `libreoffice` (optional) — the script prints the right command for your distribution.

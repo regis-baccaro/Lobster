@@ -52,6 +52,7 @@ jobs:
           version="${TAG#v}"
           sed "s/@VERSION@/$version/g" .github/release-notes.md > notes.md
           if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --notes-file notes.md
             gh release upload "$TAG" dist/* --clobber
           else
             gh release create "$TAG" dist/* --title "Lobster $version" --notes-file notes.md --latest
