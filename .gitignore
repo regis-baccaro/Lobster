@@ -1,0 +1,13 @@
+bin/
+obj/
+.publish/
+dist/
+publish*/
+*.user
+.vs/
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+*.zip
